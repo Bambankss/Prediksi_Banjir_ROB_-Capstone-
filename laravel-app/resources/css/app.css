@@ -25,3 +25,19 @@
 ::-webkit-scrollbar-thumb:hover {
     background: #475569;
 }
+
+/* Hilangkan Watermark dan Teks Attribution Leaflet Secara Total */
+.leaflet-control-attribution,
+.leaflet-control-attribution *,
+.leaflet-attribution-flag,
+.leaflet-bottom.leaflet-right {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+

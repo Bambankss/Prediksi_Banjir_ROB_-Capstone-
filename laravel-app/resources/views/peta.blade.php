@@ -2,6 +2,67 @@
 
 @section('title', 'Peta Prediksi Banjir ROB Jakarta Utara')
 
+@push('styles')
+<style>
+/* Hilangkan Watermark dan Teks Attribution Leaflet Secara Total */
+.leaflet-control-attribution,
+.leaflet-control-attribution *,
+.leaflet-attribution-flag,
+.leaflet-bottom.leaflet-right {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Pastikan Map Mengisi Penuh 100% Kontainer Tanpa Ruang Kosong */
+#map {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    background: #020617 !important;
+}
+
+.leaflet-dark-tooltip {
+    background: #0f172a !important;
+    border: 1px solid #334155 !important;
+    color: #f8fafc !important;
+    border-radius: 8px !important;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
+}
+.leaflet-dark-tooltip::before {
+    border-top-color: #0f172a !important;
+}
+
+/* Kustomisasi Kalender Flatpickr Dark Theme */
+.flatpickr-calendar {
+    background: #0f172a !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6) !important;
+    border-radius: 12px !important;
+    padding: 4px !important;
+}
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+    background: #0284c7 !important;
+    border-color: #0284c7 !important;
+}
+.flatpickr-day:hover {
+    background: #1e293b !important;
+}
+.flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
+    color: #334155 !important;
+    opacity: 0.3 !important;
+    cursor: not-allowed !important;
+}
+</style>
+@endpush
+
 @section('content')
 <div x-data="petaDashboard()" class="flex-1 flex flex-col h-full w-full overflow-hidden min-h-0">
 
@@ -20,7 +81,7 @@
     <div class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 shrink-0 z-30">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
             
-            <!-- Date Picker & Cari (Input Date dengan Filter Tanggal Tersedia) -->
+            <!-- Date Picker & Cari (Input Date dengan Tombol Cari Manual) -->
             <div class="flex items-center space-x-2 w-full sm:w-auto">
                 <label for="date-input" class="text-xs font-semibold text-slate-300 shrink-0">Tanggal:</label>
                 
@@ -39,7 +100,7 @@
                     </div>
                 </div>
 
-                <!-- Tombol Navigasi Cepat (Sebelumnya / Berikutnya) -->
+                <!-- Tombol Navigasi Cepat (Sebelumnya / Berikutnya - Otomatis Perbarui) -->
                 <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg overflow-hidden shrink-0">
                     <button type="button" @click="prevDate()" :disabled="!hasPrevDate()" title="Hari Sebelumnya"
                         class="px-2 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition">
@@ -52,13 +113,18 @@
                     </button>
                 </div>
 
-                <button @click="loadData()" :disabled="loading || !selectedDate" class="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold transition shadow-md shadow-sky-600/20 flex items-center space-x-1.5 shrink-0">
+                <!-- Tombol Cari Manual untuk Eksekusi Pilihan Input Date -->
+                <button @click="loadData()" :disabled="loading || !selectedDate"
+                    class="px-4 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 active:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold transition shadow-md shadow-sky-600/25 flex items-center space-x-1.5 shrink-0">
                     <template x-if="loading">
                         <svg class="animate-spin -ml-0.5 mr-1.5 h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                     </template>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="!loading">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
                     <span>Cari</span>
                 </button>
             </div>
@@ -317,9 +383,10 @@ function petaDashboard() {
                     minDate: this.availableDates.length ? this.availableDates[this.availableDates.length - 1] : undefined,
                     maxDate: this.availableDates.length ? this.availableDates[0] : undefined,
                     onChange: (selectedDates, dateStr) => {
-                        if (dateStr && self.selectedDate !== dateStr) {
+                        if (dateStr) {
                             self.selectedDate = dateStr;
-                            self.loadData();
+                            // Catatan: Tidak memanggil self.loadData() otomatis.
+                            // Pengguna menekan tombol 'Cari' untuk memuat peta sesuai permintaan.
                         }
                     }
                 });
@@ -341,23 +408,25 @@ function petaDashboard() {
         prevDate() {
             const idx = this.availableDates.indexOf(this.selectedDate);
             if (idx >= 0 && idx < this.availableDates.length - 1) {
-                this.setDate(this.availableDates[idx + 1]);
+                this.setDate(this.availableDates[idx + 1], true);
             }
         },
 
         nextDate() {
             const idx = this.availableDates.indexOf(this.selectedDate);
             if (idx > 0) {
-                this.setDate(this.availableDates[idx - 1]);
+                this.setDate(this.availableDates[idx - 1], true);
             }
         },
 
-        setDate(dateStr) {
+        setDate(dateStr, autoLoad = false) {
             this.selectedDate = dateStr;
             if (this.fp) {
                 this.fp.setDate(dateStr, false);
             }
-            this.loadData();
+            if (autoLoad) {
+                this.loadData();
+            }
         },
 
         initMap() {
@@ -377,20 +446,28 @@ function petaDashboard() {
                 attributionControl: false // Hilangkan attribution control bawaan
             });
 
+            // Pastikan jika ada attributionControl terbuat, langsung dibuang
+            if (this.map.attributionControl) {
+                this.map.attributionControl.remove();
+            }
+
             L.control.zoom({ position: 'topright' }).addTo(this.map);
 
-            // Base map: CartoDB Dark Matter dengan attribution kosong
+            // Base map: CartoDB Dark Matter dengan attribution false
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 maxZoom: 18,
                 subdomains: 'abcd',
-                attribution: '' // Hapus teks watermark tile
+                attribution: false // Hapus teks watermark tile
             }).addTo(this.map);
 
+            // Bersihkan elemen attribution atau flag dari DOM
             setTimeout(() => {
+                const attributions = document.querySelectorAll('.leaflet-control-attribution, .leaflet-bottom.leaflet-right');
+                attributions.forEach(el => el.remove());
                 if (this.map) {
                     this.map.invalidateSize();
                 }
-            }, 200);
+            }, 100);
 
             // Resizing listener
             window.addEventListener('resize', () => {
@@ -416,6 +493,9 @@ function petaDashboard() {
             if (!this.selectedDate) return;
             this.loading = true;
             this.errorMessage = null;
+
+            // Pastikan elemen watermark attribution terhapus dari DOM
+            document.querySelectorAll('.leaflet-control-attribution, .leaflet-bottom.leaflet-right').forEach(el => el.remove());
 
             try {
                 const url = '{{ route('data.prediksi') }}?tanggal=' + encodeURIComponent(this.selectedDate);
@@ -557,58 +637,4 @@ function petaDashboard() {
     };
 }
 </script>
-
-<style>
-/* Hilangkan Watermark dan Teks Attribution Leaflet Secara Total */
-.leaflet-control-attribution,
-.leaflet-control-attribution a,
-.leaflet-attribution-flag {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-/* Pastikan Map Mengisi Penuh 100% Kontainer Tanpa Ruang Kosong */
-#map {
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 100% !important;
-    background: #020617 !important;
-}
-
-.leaflet-dark-tooltip {
-    background: #0f172a !important;
-    border: 1px solid #334155 !important;
-    color: #f8fafc !important;
-    border-radius: 8px !important;
-    padding: 6px 10px !important;
-    font-size: 11px !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4) !important;
-}
-.leaflet-dark-tooltip::before {
-    border-top-color: #0f172a !important;
-}
-
-/* Kustomisasi Kalender Flatpickr Dark Theme */
-.flatpickr-calendar {
-    background: #0f172a !important;
-    border: 1px solid #334155 !important;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6) !important;
-    border-radius: 12px !important;
-    padding: 4px !important;
-}
-.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
-    background: #0284c7 !important;
-    border-color: #0284c7 !important;
-}
-.flatpickr-day:hover {
-    background: #1e293b !important;
-}
-.flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
-    color: #334155 !important;
-    opacity: 0.3 !important;
-    cursor: not-allowed !important;
-}
-</style>
 @endpush
