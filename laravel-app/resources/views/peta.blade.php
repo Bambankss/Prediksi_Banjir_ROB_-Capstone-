@@ -3,38 +3,58 @@
 @section('title', 'Peta Prediksi Banjir ROB Jakarta Utara')
 
 @section('content')
-<div x-data="petaDashboard()" class="flex-1 flex flex-col min-h-[calc(100vh-4rem)]">
+<div x-data="petaDashboard()" class="flex-1 flex flex-col h-full w-full overflow-hidden min-h-0">
 
     <!-- Banner Simulasi (Bila Versi Stub) -->
     @if($isSimulasi)
-    <div class="bg-amber-950/80 border-b border-amber-600/40 px-4 py-2 text-xs text-amber-200 flex items-center justify-between">
+    <div class="bg-amber-950/90 border-b border-amber-600/40 px-4 py-2 text-xs text-amber-200 flex items-center justify-between shrink-0">
         <div class="flex items-center space-x-2">
             <span class="inline-flex items-center justify-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">SIMULASI</span>
-            <span><strong>Hasil Simulasi ({{ $modelVersi }})</strong> — Data prediksi dihasilkan oleh layanan tiruan (stub) untuk keperluan demonstrasi sistem, bukan model ML final.</span>
+            <span><strong>Hasil Simulasi ({{ $modelVersi }})</strong> — Data prediksi dihasilkan oleh layanan tiruan (stub) untuk keperluan demonstrasi sistem.</span>
         </div>
         <a href="{{ route('tentang') }}" class="underline hover:text-white shrink-0 ml-2">Pelajari Selengkapnya</a>
     </div>
     @endif
 
     <!-- Control & Filter Bar -->
-    <div class="bg-slate-900 border-b border-slate-800 px-4 py-3 shrink-0">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+    <div class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 shrink-0 z-30">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
             
-            <!-- Date Picker & Cari -->
+            <!-- Date Picker & Cari (Input Date dengan Filter Tanggal Tersedia) -->
             <div class="flex items-center space-x-2 w-full sm:w-auto">
-                <label for="date-select" class="text-xs font-medium text-slate-400 shrink-0">Tanggal:</label>
-                <div class="relative flex-1 sm:w-56">
-                    <select id="date-select" x-model="selectedDate" class="w-full bg-slate-950 border border-slate-700 text-slate-100 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                        @forelse($availableDates as $dt)
-                            <option value="{{ $dt }}">{{ \Carbon\Carbon::parse($dt)->translatedFormat('d F Y') }} ({{ $dt }})</option>
-                        @empty
-                            <option value="">Belum ada tanggal tersedia</option>
-                        @endforelse
-                    </select>
+                <label for="date-input" class="text-xs font-semibold text-slate-300 shrink-0">Tanggal:</label>
+                
+                <div class="relative flex-1 sm:w-64">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-sky-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <input type="text" id="date-input" x-ref="dateInput" placeholder="Pilih tanggal prediksi..." readonly
+                        class="w-full bg-slate-950 border border-slate-700 text-slate-100 text-sm font-medium rounded-lg pl-9 pr-8 py-1.5 focus:ring-2 focus:ring-sky-500 focus:outline-none cursor-pointer">
+                    <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
                 </div>
-                <button @click="loadData()" :disabled="loading || !selectedDate" class="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition shadow-lg shadow-sky-600/20 flex items-center space-x-1.5 shrink-0">
+
+                <!-- Tombol Navigasi Cepat (Sebelumnya / Berikutnya) -->
+                <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg overflow-hidden shrink-0">
+                    <button type="button" @click="prevDate()" :disabled="!hasPrevDate()" title="Hari Sebelumnya"
+                        class="px-2 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <div class="w-px h-4 bg-slate-800"></div>
+                    <button type="button" @click="nextDate()" :disabled="!hasNextDate()" title="Hari Berikutnya"
+                        class="px-2 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+
+                <button @click="loadData()" :disabled="loading || !selectedDate" class="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold transition shadow-md shadow-sky-600/20 flex items-center space-x-1.5 shrink-0">
                     <template x-if="loading">
-                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <svg class="animate-spin -ml-0.5 mr-1.5 h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -45,47 +65,53 @@
 
             <!-- Ringkasan Statistik -->
             <div class="flex items-center space-x-2 text-xs">
-                <div class="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-600/30 text-emerald-300">
+                <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-600/30 text-emerald-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                     <span class="font-medium">Rendah:</span>
                     <span class="font-bold text-white" x-text="stats.rendah">0</span>
                 </div>
-                <div class="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-amber-950/60 border border-amber-600/30 text-amber-300">
+                <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-amber-950/60 border border-amber-600/30 text-amber-300">
                     <span class="w-2 h-2 rounded-full bg-amber-400"></span>
                     <span class="font-medium">Sedang:</span>
                     <span class="font-bold text-white" x-text="stats.sedang">0</span>
                 </div>
-                <div class="flex items-center space-x-1 px-2.5 py-1.5 rounded-lg bg-rose-950/60 border border-rose-600/30 text-rose-300">
+                <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-rose-950/60 border border-rose-600/30 text-rose-300">
                     <span class="w-2 h-2 rounded-full bg-rose-400"></span>
                     <span class="font-medium">Tinggi:</span>
                     <span class="font-bold text-white" x-text="stats.tinggi">0</span>
                 </div>
             </div>
 
-            <!-- Filter Kelurahan -->
+            <!-- Filter Kelurahan & Informasi Model -->
             <div class="flex items-center space-x-2 w-full sm:w-auto">
-                <div class="relative flex-1 sm:w-48">
-                    <input type="text" x-model="searchQuery" placeholder="Cari kelurahan..." class="w-full bg-slate-950 border border-slate-700 text-slate-100 text-xs rounded-lg pl-8 pr-3 py-2 focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                    <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="relative flex-1 sm:w-44">
+                    <input type="text" x-model="searchQuery" placeholder="Cari kelurahan..." class="w-full bg-slate-950 border border-slate-700 text-slate-100 text-xs rounded-lg pl-8 pr-3 py-1.5 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                 </div>
-                <select x-model="filterTingkat" class="bg-slate-950 border border-slate-700 text-slate-100 text-xs rounded-lg px-2.5 py-2 focus:outline-none">
-                    <option value="semua">Semua Tingkat</option>
+                <select x-model="filterTingkat" class="bg-slate-950 border border-slate-700 text-slate-100 text-xs rounded-lg px-2 py-1.5 focus:outline-none">
+                    <option value="semua">Semua</option>
                     <option value="tinggi">Tinggi</option>
                     <option value="sedang">Sedang</option>
                     <option value="rendah">Rendah</option>
                 </select>
+
+                <!-- Model Aktif Badge di Top Bar (Bersih, Bukan di Area Peta) -->
+                <div class="hidden xl:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-400">
+                    <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+                    <span>Model: <strong class="text-slate-200" x-text="meta.model_versi || '{{ $modelVersi }}'"></strong></span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Workspace (Map + Detail Panel) -->
-    <div class="flex-1 relative flex flex-col md:flex-row overflow-hidden">
+    <!-- Main Workspace (Map + Detail Panel - Mengisi 100% Sisa Layar) -->
+    <div class="flex-1 relative flex flex-col md:flex-row overflow-hidden min-h-0 h-full w-full">
 
-        <!-- Peta Leaflet Container -->
-        <div class="flex-1 relative bg-slate-950 h-full min-h-[550px]">
-            <div id="map" class="w-full h-full min-h-[550px] z-10" style="min-height: 550px; height: 100%;"></div>
+        <!-- Peta Leaflet Container (100% Full Height & Width) -->
+        <div class="flex-1 relative bg-slate-950 h-full w-full min-h-0 overflow-hidden">
+            <div id="map" class="w-full h-full z-10"></div>
 
             <!-- State: Loading Overlay -->
             <div x-show="loading" class="absolute inset-0 bg-slate-950/70 z-20 flex flex-col items-center justify-center backdrop-blur-xs">
@@ -108,32 +134,25 @@
                 <div class="space-y-1.5">
                     <div class="flex items-center space-x-2">
                         <span class="w-3.5 h-3.5 rounded bg-rose-500 border border-rose-600"></span>
-                        <span class="text-slate-200 font-medium">Tinggi (P &ge; 70%)</span>
+                        <span class="text-slate-200 font-medium">Tinggi (P &ge; 65%)</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="w-3.5 h-3.5 rounded bg-amber-500 border border-amber-600"></span>
-                        <span class="text-slate-200 font-medium">Sedang (40% - 69%)</span>
+                        <span class="text-slate-200 font-medium">Sedang (35% - 64%)</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="w-3.5 h-3.5 rounded bg-emerald-500 border border-emerald-600"></span>
-                        <span class="text-slate-200 font-medium">Rendah (&lt; 40%)</span>
+                        <span class="text-slate-200 font-medium">Rendah (&lt; 35%)</span>
                     </div>
                 </div>
                 <div class="border-t border-slate-800 pt-1 text-[10px] text-slate-400">
                     Klik kelurahan untuk melihat detail fitur
                 </div>
             </div>
-
-            <!-- Metadata Pembaruan (Float Bottom-Right) -->
-            <div class="absolute bottom-2 right-5 z-20 text-[10px] text-slate-400 bg-slate-900/80 px-2.5 py-1 rounded-md border border-slate-800/80">
-                <span>Versi: <strong class="text-slate-200" x-text="meta.model_versi || '{{ $modelVersi }}'"></strong></span>
-                <span class="mx-1">&bull;</span>
-                <span x-text="meta.diperbarui_pada ? 'Diperbarui: ' + formatDate(meta.diperbarui_pada) : 'Siap'"></span>
-            </div>
         </div>
 
         <!-- Detail Panel (Slide-in / Sidebar Kanan) -->
-        <div class="w-full md:w-96 bg-slate-900 border-l border-slate-800 flex flex-col shrink-0 z-20 overflow-y-auto" :class="selectedKelurahan ? 'block' : 'hidden md:block'">
+        <div class="w-full md:w-96 bg-slate-900 border-l border-slate-800 flex flex-col shrink-0 z-20 overflow-y-auto h-full" :class="selectedKelurahan ? 'block' : 'hidden md:block'">
             
             <template x-if="selectedKelurahan">
                 <div class="p-5 flex-1 flex flex-col space-y-5">
@@ -257,6 +276,8 @@
 function petaDashboard() {
     return {
         selectedDate: '{{ $selectedDate }}',
+        availableDates: @json($availableDates),
+        fp: null,
         loading: false,
         errorMessage: null,
         predictions: {},
@@ -273,12 +294,70 @@ function petaDashboard() {
 
         init() {
             this.$nextTick(async () => {
+                this.initDatePicker();
                 this.initMap();
                 await this.loadGeoJson();
                 if (this.selectedDate) {
                     await this.loadData();
                 }
             });
+        },
+
+        initDatePicker() {
+            if (typeof flatpickr !== 'undefined' && this.$refs.dateInput) {
+                const self = this;
+                this.fp = flatpickr(this.$refs.dateInput, {
+                    locale: typeof flatpickr.l10ns.id !== 'undefined' ? flatpickr.l10ns.id : 'default',
+                    dateFormat: 'Y-m-d',
+                    altInput: true,
+                    altFormat: 'd F Y',
+                    altInputClass: 'w-full bg-slate-950 border border-slate-700 text-slate-100 text-sm font-medium rounded-lg pl-9 pr-8 py-1.5 focus:ring-2 focus:ring-sky-500 focus:outline-none cursor-pointer',
+                    defaultDate: this.selectedDate,
+                    enable: this.availableDates, // HANYA tanggal ini yang bisa diklik / dipilih
+                    minDate: this.availableDates.length ? this.availableDates[this.availableDates.length - 1] : undefined,
+                    maxDate: this.availableDates.length ? this.availableDates[0] : undefined,
+                    onChange: (selectedDates, dateStr) => {
+                        if (dateStr && self.selectedDate !== dateStr) {
+                            self.selectedDate = dateStr;
+                            self.loadData();
+                        }
+                    }
+                });
+            }
+        },
+
+        hasPrevDate() {
+            if (!this.availableDates || !this.availableDates.length) return false;
+            const idx = this.availableDates.indexOf(this.selectedDate);
+            return idx >= 0 && idx < this.availableDates.length - 1;
+        },
+
+        hasNextDate() {
+            if (!this.availableDates || !this.availableDates.length) return false;
+            const idx = this.availableDates.indexOf(this.selectedDate);
+            return idx > 0;
+        },
+
+        prevDate() {
+            const idx = this.availableDates.indexOf(this.selectedDate);
+            if (idx >= 0 && idx < this.availableDates.length - 1) {
+                this.setDate(this.availableDates[idx + 1]);
+            }
+        },
+
+        nextDate() {
+            const idx = this.availableDates.indexOf(this.selectedDate);
+            if (idx > 0) {
+                this.setDate(this.availableDates[idx - 1]);
+            }
+        },
+
+        setDate(dateStr) {
+            this.selectedDate = dateStr;
+            if (this.fp) {
+                this.fp.setDate(dateStr, false);
+            }
+            this.loadData();
         },
 
         initMap() {
@@ -290,28 +369,35 @@ function petaDashboard() {
             const mapEl = document.getElementById('map');
             if (!mapEl) return;
 
-            // Center di Jakarta Utara [-6.138, 106.87]
+            // Inisialisasi peta Leaflet TANPA watermark attribution
             this.map = L.map(mapEl, {
                 center: [-6.138, 106.87],
                 zoom: 12,
                 zoomControl: false,
-                attributionControl: false
+                attributionControl: false // Hilangkan attribution control bawaan
             });
 
             L.control.zoom({ position: 'topright' }).addTo(this.map);
 
-            // Base map: CartoDB Dark Matter dengan attribution
+            // Base map: CartoDB Dark Matter dengan attribution kosong
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 maxZoom: 18,
                 subdomains: 'abcd',
-                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+                attribution: '' // Hapus teks watermark tile
             }).addTo(this.map);
 
             setTimeout(() => {
                 if (this.map) {
                     this.map.invalidateSize();
                 }
-            }, 300);
+            }, 200);
+
+            // Resizing listener
+            window.addEventListener('resize', () => {
+                if (this.map) {
+                    this.map.invalidateSize();
+                }
+            });
         },
 
         async loadGeoJson() {
@@ -446,7 +532,7 @@ function petaDashboard() {
 
             if (!this.boundsFitted && this.geojsonLayer.getLayers().length > 0) {
                 try {
-                    this.map.fitBounds(this.geojsonLayer.getBounds(), { padding: [15, 15] });
+                    this.map.fitBounds(this.geojsonLayer.getBounds(), { padding: [20, 20] });
                     this.boundsFitted = true;
                 } catch (e) {}
             }
@@ -473,11 +559,24 @@ function petaDashboard() {
 </script>
 
 <style>
+/* Hilangkan Watermark dan Teks Attribution Leaflet Secara Total */
+.leaflet-control-attribution,
+.leaflet-control-attribution a,
+.leaflet-attribution-flag {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Pastikan Map Mengisi Penuh 100% Kontainer Tanpa Ruang Kosong */
 #map {
     width: 100% !important;
-    min-height: 550px !important;
     height: 100% !important;
+    min-height: 100% !important;
+    background: #020617 !important;
 }
+
 .leaflet-dark-tooltip {
     background: #0f172a !important;
     border: 1px solid #334155 !important;
@@ -490,6 +589,26 @@ function petaDashboard() {
 .leaflet-dark-tooltip::before {
     border-top-color: #0f172a !important;
 }
+
+/* Kustomisasi Kalender Flatpickr Dark Theme */
+.flatpickr-calendar {
+    background: #0f172a !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6) !important;
+    border-radius: 12px !important;
+    padding: 4px !important;
+}
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+    background: #0284c7 !important;
+    border-color: #0284c7 !important;
+}
+.flatpickr-day:hover {
+    background: #1e293b !important;
+}
+.flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
+    color: #334155 !important;
+    opacity: 0.3 !important;
+    cursor: not-allowed !important;
+}
 </style>
 @endpush
-

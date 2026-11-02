@@ -10,12 +10,18 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
+    <!-- Flatpickr CSS & JS (Dark Theme & ID Locale) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+
     <!-- Google Fonts & Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @stack('styles')
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-sky-500 selection:text-white {{ request()->routeIs('peta') ? 'h-screen overflow-hidden' : '' }}">
 
     <!-- Header / Navbar -->
     <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur border-b border-slate-800">
@@ -99,11 +105,12 @@
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col">
+    <main class="flex-1 flex flex-col {{ request()->routeIs('peta') ? 'h-[calc(100vh-4rem)] overflow-hidden min-h-0' : '' }}">
         @yield('content')
     </main>
 
-    <!-- Footer -->
+    @if(!request()->routeIs('peta'))
+    <!-- Footer (Khusus Halaman Non-Peta) -->
     <footer class="bg-slate-950 border-t border-slate-800/80 text-slate-400 text-xs py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center space-x-2">
@@ -118,6 +125,7 @@
             </div>
         </div>
     </footer>
+    @endif
 
     @stack('scripts')
 </body>
