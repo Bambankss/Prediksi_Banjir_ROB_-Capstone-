@@ -67,12 +67,15 @@ class PrediksiServiceTest extends TestCase
             ];
         }
 
+        $modelVersi = config('services.predictor.model_versi_aktif', 'model-v1');
+        $isSimulasi = str_starts_with($modelVersi, 'stub');
+
         // Mock Predictor service response
         Http::fake([
             '*/predict' => Http::response([
-                'model_versi' => 'stub-v0',
-                'mode' => 'stub',
-                'simulasi' => true,
+                'model_versi' => $modelVersi,
+                'mode' => $isSimulasi ? 'stub' : 'model',
+                'simulasi' => $isSimulasi,
                 'hasil' => $mockHasil,
             ], 200),
         ]);
@@ -85,7 +88,7 @@ class PrediksiServiceTest extends TestCase
 
         $status = StatusPrediksi::where('tanggal', '2026-05-01')->first();
         $this->assertEquals('berhasil', $status->status);
-        $this->assertTrue($status->is_simulasi);
+        $this->assertEquals($isSimulasi, $status->is_simulasi);
         $this->assertEquals(31, $status->jumlah_hasil);
     }
 

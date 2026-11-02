@@ -105,26 +105,134 @@
         </div>
     </section>
 
-    <!-- 3. Metodologi Prediksi -->
+    <!-- 3. Metodologi Prediksi & Model Machine Learning -->
     <section class="space-y-4">
         <h2 class="text-xl font-bold text-white flex items-center space-x-2">
             <span class="w-2 h-5 rounded-full bg-cyan-500 inline-block"></span>
-            <span>3. Metodologi & Penentuan Ambang Risiko</span>
+            <span>3. Model Machine Learning & Metrik Evaluasi</span>
         </h2>
+
+        <div class="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                <div>
+                    <span class="text-slate-400">Algoritma Utama:</span>
+                    <span class="font-bold text-white text-sm ml-1">Random Forest Classifier (Ensemble Bagging)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        Model Aktif: model-v1
+                    </span>
+                    <span class="text-slate-500">| Periode Data Latih: 2023–2025</span>
+                </div>
+            </div>
+
+            <!-- Perbandingan Model & Metrik -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1">
+                <div>
+                    <h3 class="font-semibold text-slate-200 mb-2">Hasil Evaluasi Data Uji (Test Set 20% - Group Split):</h3>
+                    <div class="overflow-x-auto rounded-lg border border-slate-800 bg-slate-950">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-900 text-slate-400 border-b border-slate-800">
+                                <tr>
+                                    <th class="px-3 py-2">Model</th>
+                                    <th class="px-3 py-2">Akurasi</th>
+                                    <th class="px-3 py-2">Recall (ROB)</th>
+                                    <th class="px-3 py-2">F1-Score</th>
+                                    <th class="px-3 py-2">ROC-AUC</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                                <tr class="text-slate-400">
+                                    <td class="px-3 py-2">Baseline (Logistic Regression)</td>
+                                    <td class="px-3 py-2">65.8%</td>
+                                    <td class="px-3 py-2">75.0%</td>
+                                    <td class="px-3 py-2">0.6818</td>
+                                    <td class="px-3 py-2">0.7060</td>
+                                </tr>
+                                <tr class="bg-emerald-950/20 text-emerald-300 font-semibold">
+                                    <td class="px-3 py-2 flex items-center space-x-1">
+                                        <span>Random Forest (v1)</span>
+                                        <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400">Terpilih</span>
+                                    </td>
+                                    <td class="px-3 py-2">80.5%</td>
+                                    <td class="px-3 py-2">85.0%</td>
+                                    <td class="px-3 py-2">0.8095</td>
+                                    <td class="px-3 py-2">0.8625</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold text-slate-200 mb-2">Tingkat Kontribusi Fitur (Feature Importance):</h3>
+                    <div class="space-y-2 p-3 rounded-lg border border-slate-800 bg-slate-950">
+                        <div>
+                            <div class="flex justify-between text-[11px] mb-1">
+                                <span class="text-slate-300 font-medium">1. Pasang Tertinggi Laut</span>
+                                <span class="text-sky-400 font-bold">44.16%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-sky-500 h-1.5 rounded-full" style="width: 44.16%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] mb-1">
+                                <span class="text-slate-300 font-medium">2. Gelombang Tertinggi</span>
+                                <span class="text-sky-400 font-bold">23.19%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-sky-500 h-1.5 rounded-full" style="width: 23.19%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] mb-1">
+                                <span class="text-slate-300 font-medium">3. Jarak ke Garis Pantai</span>
+                                <span class="text-sky-400 font-bold">14.05%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-sky-500 h-1.5 rounded-full" style="width: 14.05%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] mb-1">
+                                <span class="text-slate-300 font-medium">4. Elevasi Permukaan Tanah</span>
+                                <span class="text-sky-400 font-bold">9.66%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-sky-500 h-1.5 rounded-full" style="width: 9.66%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] mb-1">
+                                <span class="text-slate-300 font-medium">5. Curah Hujan Harian</span>
+                                <span class="text-sky-400 font-bold">8.94%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-sky-500 h-1.5 rounded-full" style="width: 8.94%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ambang Batas Risiko -->
+        <h3 class="font-bold text-white text-sm pt-2">Ambang Batas Tingkat Risiko:</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
             <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
                 <span class="px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">Risiko Rendah</span>
-                <p class="text-slate-300">Probabilitas kejadian ROB <strong>&lt; 40%</strong>.</p>
-                <p class="text-slate-400 text-[11px]">Kondisi pasang air laut normal dan elevasi wilayah cukup aman dari genangan pasang.</p>
+                <p class="text-slate-300">Probabilitas model <strong>&lt; 35%</strong> (&lt; 0.35).</p>
+                <p class="text-slate-400 text-[11px]">Kondisi pasang air laut normal dan elevasi wilayah aman dari genangan rob.</p>
             </div>
             <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
                 <span class="px-2 py-0.5 rounded font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">Risiko Sedang</span>
-                <p class="text-slate-300">Probabilitas kejadian ROB <strong>40% s.d. 69%</strong>.</p>
-                <p class="text-slate-400 text-[11px]">Kombinasi pasang laut menengah dengan jarak pantai dekat atau disertai hujan lokal.</p>
+                <p class="text-slate-300">Probabilitas model <strong>35% s.d. 64%</strong> (0.35 - 0.64).</p>
+                <p class="text-slate-400 text-[11px]">Pasang air laut menengah dikombinasikan dengan jarak pantai yang dekat atau hujan lokal.</p>
             </div>
             <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
                 <span class="px-2 py-0.5 rounded font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 uppercase">Risiko Tinggi</span>
-                <p class="text-slate-300">Probabilitas kejadian ROB <strong>&ge; 70%</strong>.</p>
+                <p class="text-slate-300">Probabilitas model <strong>&ge; 65%</strong> (&ge; 0.65).</p>
                 <p class="text-slate-400 text-[11px]">Pasang maksimum tinggi (> 1.0 m) bertepatan dengan elevasi rendah (&le; 1.0 m) dan gelombang tinggi.</p>
             </div>
         </div>

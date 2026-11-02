@@ -1,0 +1,42 @@
+{
+  "model_versi": "model-v1",
+  "algoritma": "RandomForestClassifier",
+  "tanggal_latih": "2026-11-02",
+  "fitur": [
+    "elevasi",
+    "jarak_pantai",
+    "curah_hujan",
+    "pasang_tertinggi",
+    "gelombang_tertinggi"
+  ],
+  "ambang_tingkat": {
+    "tinggi": 0.65,
+    "sedang": 0.35,
+    "rendah": 0.0
+  },
+  "metrik_uji": {
+    "akurasi": 0.8049,
+    "precision_kelas_1": 0.7727,
+    "recall_kelas_1": 0.85,
+    "f1_kelas_1": 0.8095,
+    "roc_auc": 0.8625
+  },
+  "baseline_logistic_regression": {
+    "akurasi": 0.6585,
+    "recall_kelas_1": 0.75,
+    "f1_kelas_1": 0.6818,
+    "roc_auc": 0.706
+  },
+  "feature_importance": {
+    "elevasi": 0.0966,
+    "jarak_pantai": 0.1405,
+    "curah_hujan": 0.0894,
+    "pasang_tertinggi": 0.4416,
+    "gelombang_tertinggi": 0.2319
+  },
+  "periode_data": {
+    "awal": "2023-01-01",
+    "akhir": "2025-12-08",
+    "total_baris": 414
+  }
+}

@@ -81,12 +81,11 @@ Lisensi dan atribusi tiap sumber: `[ISI]`.
 
 | Berkas | Tanggal awal | Tanggal akhir | Jumlah baris | Jumlah `is_banjir = 1` | Jumlah `is_banjir = 0` |
 |---|---|---|---|---|---|
-| `data_latih.csv` | `[ISI]` (rencana: sekitar 2022) | `[ISI]` (rencana: sekitar 2025) | `[ISI]` | `[ISI]` (rencana: sekitar 400-an kejadian terlaporkan) | `[ISI]` |
-| `data_harian2026.csv` | `[ISI]` | `[ISI]` | `[ISI]` (31 x jumlah tanggal) | tidak ada label | tidak ada label |
+| `data_latih.csv` | 2023-01-01 | 2025-12-08 | 414 | 207 | 207 |
+| `data_harian2026.csv` | 2026-01-01 | 2026-09-30 | 8.463 (31 x 273 hari) | tidak ada label | tidak ada label |
 
-Periode yang bolong (tanggal tanpa data): `[ISI]`
-
-Pembagian data latih/uji: berdasarkan **tanggal**, bukan acak (contoh: latih 2022-2024, uji 2025). Semua kelurahan pada satu tanggal berada di sisi yang sama karena berbagi pasang dan gelombang. Rencana final: `[ISI]`
+Pembagian data latih/uji: `GroupShuffleSplit` (80% latih, 20% uji) berdasarkan **tanggal** (tanpa kebocoran tanggal). Latih: 332 baris, Uji: 82 baris.
+Model Aktif: `RandomForestClassifier` (`model-v1`), Akurasi Uji 80.5%, Recall 85.0%, F1-Score 81.0%, ROC-AUC 86.25%. Ambang risiko: Rendah (< 0.35), Sedang (0.35 - 0.64), Tinggi (>= 0.65).
 
 ## Kode wilayah
 
